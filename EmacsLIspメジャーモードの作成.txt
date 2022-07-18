@@ -1,0 +1,108 @@
+                EmacsLIspメジャーモードの作成           (2022-07-17)
+                ----------------------------
+
+
+Windows10 Emacs情報
+-------------------
+
+インストール位置：      ~\scoop\apps\emacs\27.1\bin\emacs.exe
+ライブラリ位置：        ~\scoop\apps\emacs\current\share\emacs\27.1\site-lisp\
+                      ~\scoop\apps\emacs\current\share\emacs\site-lisp\
+                      ~\scoop\apps\emacs\current\share\emacs\27.1\lisp\
+設定ファイル位置：      ~\AppData\Roaming\.emacs.d\init.el
+
+※ライブラリのロードパスは、*scratch*バッファでload-pathを評価すれば確認できる。
+
+
+メジャーモードの必須条件
+----------------------
+
+・モード名を設定する。
+・使用するキーマップを設定する。
+・必要な変数を設定する。
+
+
+モード名の設定・モードラインのモード名フィールドも変更
+-------------------------------------------------
+
+(setq major-mode 'my-mode)
+(setq mode-name "MY mode")
+
+
+キーマップの設定・キーの割当て・ローカルマップ使用宣言
+-------------------------------------------------
+
+(setq my-local-map (make-keymap))
+(define-key my-local-map "h" 'backward-char)
+(define-key my-local-map "j" 'previous-line)
+(define-key my-local-map "k" 'next-line)
+(define-key my-local-map "l" 'forward-char)
+(use-local-map  my-local-map)
+
+
+メジャーモード関数の定義
+----------------------
+
+(defun my-mode ()
+  (interactive)
+  モード名の設定
+  キーマップの設定
+)
+
+
+インタラクティブ関数をキーにバインドする
+-------------------------------------
+
+(defun hello-word ()
+  (interactive)
+  (insert "Hello, world!\n"))
+(define-key global-map "\C-ch" 'hello-world)      ; global-mapでテスト
+
+
+関数を実際に定義する
+------------------
+
+・my-mode という名前のメジャーモードである。
+・hjkl でカーソル移動することができる。
+・C-ch を押すと `Hello, world!' が入力できる。
+
+(defun my-mode ()
+  (interactive)
+  (setq major-mode 'my-mode
+    mode-name "MY mode")
+  (setq my-local-map (make-keymap))
+  (define-key my-local-map "h" 'backward-char)
+  (define-key my-local-map "j" 'previous-line)
+  (define-key my-local-map "k" 'next-line)
+  (define-key my-local-map "l" 'forward-char)
+  (define-key my-local-map "\C-ch" 'hello-world)
+  (use-local-map my-local-map))
+
+(defun hello-world ()
+  (interactive)
+  (insert "Hello, world!\n"))
+
+*scratch*バッファにこの2つの関数定義を貼り付けてC-jで評価すれば、
+M-x my-modeでMY modeを起動できる。
+*scratch*バッファのままモード表示はMY modeになり、
+hjklによるカーソル移動とC-c hによる"hello-world!"挿入を確認できる。
+
+上の関数定義2つをファイル"my-mode.el"に書いて、ディレクトリ
+~\scoop\apps\emacs\current\share\emacs\site-lisp\
+に置いたとする。
+このディレクトリはライブラリのロードパスに含まれるので、*scratch*バッファで
+(load "my-mode")
+を評価すれば、これらの関数定義を読み込める。
+その後M-x my-modeでMY modeを起動できる。
+
+
+まめ知識１
+---------
+
+Emacs Lispのプログラムには、拡張子.elをつける。
+Emacs Lispのプログラムには、1行目に;-*- Emacs-Lisp -*-を入れる。
+Emacsで拡張子が.elのファイルを開くと、Emacs-Lispモードに入る。
+Emacs-Lispモードでは、関数にカーソルを合わせてESC- C-xで関数を評価できる。
+Lisp式を評価するには*scratch*バッファを使う。
+*scratch*バッファでは、式の後ろでC-jとすれば、その結果がバッファに挿入される。
+
